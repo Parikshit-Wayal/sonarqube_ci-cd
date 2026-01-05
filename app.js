@@ -1,13 +1,7 @@
-
-const http = require('http');
-
-function insecureFunction() {
-    eval("console.log('This is insecure code')"); // ❌ Security issue
+function broken() {
+    return;
+    console.log("never runs");
 }
 
-insecureFunction();
-
-http.createServer((req, res) => {
-    res.end("Hello World");
-}).listen(3000);
+broken();
 

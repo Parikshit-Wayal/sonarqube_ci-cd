@@ -40,6 +40,11 @@
 │  ┌────────────────────────┐ │
 │  │ Email Notification     │ │
 │  │ (Success / Failure)   │ │
-│  └────────────────────────┘ │
-└──────────────────────────────┘
 
+
+This is the "Pipeline as Code" approach. If the Definition is set to Pipeline script from SCM, you tell Jenkins:
+
+Where the code is: You provide the Git URL.
+and the our credential also where we state in the jenkins global cred
+
+parametrized the env var like my email and the sonaqube key
