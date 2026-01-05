@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Must match Jenkins Global Configuration names
         SONARQUBE_SERVER   = 'SonarQube'
         SONAR_SCANNER_NAME = 'SonarScanner'
-        SONAR_PROJECT_KEY  = 'nodejs_App'
+        SONAR_PROJECT_KEY  = 'simple-node-ci'
+
+        EMAIL_RECIPIENTS = 'parikshitwayal3@gmail.com'
+        DOCKER_IMAGE     = "simple-node-ci:${BUILD_NUMBER}"
     }
 
     stages {
@@ -49,8 +51,37 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t nodejs-app:1.0 .'
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
+        }
+    }
+
+    post {
+        success {
+            emailext(
+                subject: "✅ SUCCESS: Jenkins Build #${BUILD_NUMBER}",
+                body: """
+CI Pipeline SUCCESS
+
+Job: ${JOB_NAME}
+Build: ${BUILD_NUMBER}
+Docker Image: ${DOCKER_IMAGE}
+""",
+                to: "${EMAIL_RECIPIENTS}"
+            )
+        }
+
+        failure {
+            emailext(
+                subject: "❌ FAILURE: Jenkins Build #${BUILD_NUMBER}",
+                body: """
+CI Pipeline FAILED
+
+Job: ${JOB_NAME}
+Build: ${BUILD_NUMBER}
+""",
+                to: "${EMAIL_RECIPIENTS}"
+            )
         }
     }
 }
