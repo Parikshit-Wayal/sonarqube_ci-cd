@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
+        // SonarQube configuration (from Jenkins Global Config)
         SONARQUBE_SERVER   = 'SonarQube'
         SONAR_SCANNER_NAME = 'SonarScanner'
         SONAR_PROJECT_KEY  = 'simple-node-ci'
 
+        // Email & Docker configuration
         EMAIL_RECIPIENTS = 'parikshitwayal3@gmail.com'
         DOCKER_IMAGE     = "simple-node-ci:${BUILD_NUMBER}"
     }
@@ -57,30 +59,60 @@ pipeline {
     }
 
     post {
+
         success {
-            emailext(
+            mail(
+                to: "${EMAIL_RECIPIENTS}",
                 subject: "✅ SUCCESS: Jenkins Build #${BUILD_NUMBER}",
                 body: """
 CI Pipeline SUCCESS
 
-Job: ${JOB_NAME}
-Build: ${BUILD_NUMBER}
-Docker Image: ${DOCKER_IMAGE}
-""",
-                to: "${EMAIL_RECIPIENTS}"
+Job Name     : ${JOB_NAME}
+Build Number : ${BUILD_NUMBER}
+Status       : SUCCESS
+Docker Image : ${DOCKER_IMAGE}
+
+Regards,
+Jenkins CI
+"""
             )
         }
 
         failure {
-            emailext(
+            mail(
+                to: "${EMAIL_RECIPIENTS}",
                 subject: "❌ FAILURE: Jenkins Build #${BUILD_NUMBER}",
                 body: """
 CI Pipeline FAILED
 
-Job: ${JOB_NAME}
-Build: ${BUILD_NUMBER}
-""",
-                to: "${EMAIL_RECIPIENTS}"
+Job Name     : ${JOB_NAME}
+Build Number : ${BUILD_NUMBER}
+Status       : FAILURE
+
+Please check Jenkins console logs for details.
+
+Regards,
+Jenkins CI
+"""
+            )
+        }
+
+        aborted {
+            mail(
+                to: "${EMAIL_RECIPIENTS}",
+                subject: "⚠️ ABORTED: Jenkins Build #${BUILD_NUMBER}",
+                body: """
+CI Pipeline ABORTED
+
+Job Name     : ${JOB_NAME}
+Build Number : ${BUILD_NUMBER}
+Status       : ABORTED
+
+Possible reason: Quality Gate failure or manual abort.
+
+Regards,
+Jenkins CI
+"""
             )
         }
     }
